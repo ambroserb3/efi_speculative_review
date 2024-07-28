@@ -1,51 +1,419 @@
 {
   "prompts": [
     {
-      "question": "Is racial justice a theme within this story?",
-      "follow_ups": {
-        "yes": {
-          "question": "Explain how racial justice emerges as a theme within the story.",
-          "follow_ups": {}
-        },
-        "no": {}
-      },
-      "constraints": ["limit_words:100"]
-    },
-    {
-      "question": "What is the story synopsis?",
-      "follow_ups": {},
-      "constraints": ["limit_words:150"]
+      "question": "Summarize the plot of the story.",
+      "constraints": ["limit_words:150"],
+      "follow_ups": {}
     },
     {
       "question": "Who is the protagonist of the story?",
-      "follow_ups": {},
-      "constraints": []
+      "constraints": ["limit_words:50"],
+      "follow_ups": {
+        "yes": {
+          "questions": [
+            {
+              "question": "What are the protagonist's goals?",
+              "constraints": ["limit_words:50", "comma_separated_list"]
+            },
+            {
+              "question": "What are the protagonist's motivations?",
+              "constraints": ["limit_words:50", "comma_separated_list"]
+            },
+            {
+              "question": "What are the protagonist's strengths?",
+              "constraints": ["limit_words:50", "comma_separated_list"]
+            },
+            {
+              "question": "What are the protagonist's weaknesses?",
+              "constraints": ["limit_words:50", "comma_separated_list"]
+            },
+            {
+              "question": "How does the protagonist evolve throughout the story?",
+              "constraints": ["limit_words:50"]
+            }
+          ]
+        }
+      }
     },
     {
       "question": "Who is the antagonist?",
-      "follow_ups": {},
-      "constraints": []
+      "constraints": ["limit_words:50"],
+      "follow_ups": {}
     },
     {
-      "question": "What are the major themes?",
-      "follow_ups": {},
-      "constraints": []
+      "question": "Using a list of keywords, what is the setting of the story?",
+      "constraints": ["comma_separated_list", "limit_words:25"],
+      "follow_ups": {}
     },
     {
-      "question": "Are there any re-occurring symbols?",
-      "follow_ups": {},
-      "constraints": []
+      "question": "What is the primary conflict in the story?",
+      "constraints": ["limit_words:150"],
+      "follow_ups": {}
     },
     {
-      "question": "Do any elements of the story tie into the x social justice issue?",
+      "question": "List up to 5 main characters in the story.",
+      "constraints": ["comma_separated_list", "limit_words:25"],
+      "follow_ups": {}
+    },
+    {
+      "question": "Using a list of keywords, what are the major themes of the story?",
+      "constraints": ["comma_separated_list", "limit_words:25"],
+      "follow_ups": {}
+    },
+    {
+      "question": "What is the tone of the story?",
+      "constraints": ["limit_words:10"],
+      "follow_ups": {}
+    },
+    {
+      "question": "What is the mood of the story?",
+      "constraints": ["limit_words:10"],
+      "follow_ups": {}
+    },
+    {
+      "question": "Using a list, what symbols are used in the story, if any?",
+      "constraints": ["comma_separated_list", "limit_words:25"],
+      "follow_ups": {}
+    },
+    {
+      "question": "Using a list, what motifs are used in the story, if any?",
+      "constraints": ["comma_separated_list", "limit_words:25"],
+      "follow_ups": {}
+    },
+    {
+      "question": "When does the story take place?",
+      "constraints": ["limit_words:5"],
+      "follow_ups": {}
+    },
+    {
+      "question": "How does the historical context of the time period influence the story?",
+      "constraints": ["limit_words:50"],
       "follow_ups": {
         "yes": {
-          "question": "Explain how these elements tie into the x social justice issue.",
-          "follow_ups": {}
+          "questions": [
+            {
+              "question": "How does the historical context influence the characters?",
+              "constraints": ["limit_words:50"]
+            },
+            {
+              "question": "Does the story challenge any historical norms of its time?",
+              "constraints": ["limit_words:50"]
+            },
+            {
+              "question": "How does the historical context influence the plot?",
+              "constraints": ["limit_words:50"]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "question": "What is the point of view of the story?",
+      "constraints": ["limit_words:1", "point_of_view"],
+      "follow_ups": {}
+    },
+    {
+      "question": "Using a list of keywords what type of language is used? I.e Is the language simple or elegant? Short or long sentences? Straightforward or descriptive? Are words from other languages used frequently?",
+      "constraints": ["limit_words:50", "comma_separated_list"],
+      "follow_ups": {}
+    },
+    {
+      "question": "What lessons can be learned from the story?",
+      "constraints": ["limit_words:50"],
+      "follow_ups": {}
+    },
+    {
+      "question": "Does the story have a happy ending?",
+      "constraints": ["yes_no", "limit_words:1"],
+      "follow_ups": {
+        "yes": {
+          "questions": [
+            {
+              "question": "Describe the happy ending.",
+              "constraints": ["limit_words:50"]
+            },
+            {
+              "question": "Why was the story's ending happy?",
+              "constraints": ["limit_words:50"]
+            }
+          ]
         },
-        "no": {}
-      },
-      "constraints": ["limit_words:100"]
+        "no": {
+          "questions": [
+            {
+              "question": "Describe the ending of the story.",
+              "constraints": ["limit_words:50"]
+            },
+            {
+              "question": "Why was the story's ending not happy?",
+              "constraints": ["limit_words:50"]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "question": "What is the novum of this story?",
+      "constraints": ["limit_words:100"],
+      "follow_ups": {}
+    },
+    {
+      "question": "Is this work classified as science fiction?",
+      "constraints": ["yes_no", "limit_words:1"],
+      "follow_ups": {
+        "yes": {
+          "questions": [
+            {
+              "question": "What science or technology is prominently featured in the story?",
+              "constraints": ["limit_words:100"]
+            },
+            {
+              "question": "How accurate is the portrayal of this science or technology?",
+              "constraints": ["limit_words:100"]
+            },
+            {
+              "question": "Is the story hard or soft science fiction? Via the definition of how important the science is to the story.",
+              "constraints": ["limit_words:1"]
+            },
+            {
+              "question": "Is this story dystopian, utopian, or neither?",
+              "constraints": ["limit_words:1"]
+            },
+            {
+              "question": "Using a list of keywords, what sub-genres of science fiction does this story fall under?",
+              "constraints": ["limit_words:30", "comma_separated_list"]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "question": "Is this work classified as fantasy?",
+      "constraints": ["yes_no", "limit_words:1"],
+      "follow_ups": {
+        "yes": {
+          "questions": [
+            {
+              "question": "Describe the world-building in the story.",
+              "constraints": ["limit_words:100"]
+            },
+            {
+              "question": "Is the story high fantasy or low fantasy?",
+              "constraints": ["limit_words:10"]
+            },
+            {
+              "question": "Using a list of keywords, what sub-genres of fantasy does this story fall under?",
+              "constraints": ["limit_words:30", "comma_separated_list"]
+            },
+            {
+              "question": "Is there a magic system in the story?",
+              "constraints": ["yes_no", "limit_words:1"],
+              "follow_ups": {
+                "yes": {
+                  "questions": [
+                    {
+                      "question": "Describe the magic system.",
+                      "constraints": ["limit_words:100"]
+                    },
+                    {
+                      "question": "Is the magic system hard or soft?",
+                      "constraints": ["limit_words:1"]
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "question": "Is racial justice a theme within this story?",
+      "constraints": ["yes_no", "limit_words:1"],
+      "follow_ups": {
+        "yes": {
+          "questions": [
+            {
+              "question": "Could any of the characters be considered a racial minority?",
+              "constraints": ["limit_words:1", "yes_no"],
+              "follow_ups": {
+                "yes": {
+                  "questions": [
+                    {
+                      "question": "How are racial minorities portrayed in the story?",
+                      "constraints": ["limit_words:100"]
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "question": "How is racial justice addressed in the story?",
+              "constraints": ["limit_words:100"]
+            },
+            {
+              "question": "How does the treatment of race in the story compare to the modern understandings of race theory?",
+              "constraints": ["limit_words:100"]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "question": "Does the story explore gender equity?",
+      "constraints": ["yes_no", "limit_words:1"],
+      "follow_ups": {
+        "yes": {
+          "questions": [
+            {
+              "question": "What is the gender of the protagonist?",
+              "constraints": ["limit_words:1", "gender"]
+            },
+            {
+              "question": "What is the gender of the antagonist?",
+              "constraints": ["limit_words:1", "gender"]
+            },
+            {
+              "question": "How is gender equity addressed in the story?",
+              "constraints": ["limit_words:100"]
+            },
+            {
+              "question": "How does the treatment of gender in the story compare to the modern understandings of gender theory?",
+              "constraints": ["limit_words:100"]
+            },
+            {
+              "question": "Is there a gender gap in the story?",
+              "constraints": ["yes_no", "limit_words:1"],
+              "follow_ups": {
+                "yes": {
+                  "questions": [
+                    {
+                      "question": "How is the gender gap addressed in the story?",
+                      "constraints": ["limit_words:100"]
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "question": "Does the story pass the Bechdel test?",
+              "constraints": ["yes_no", "limit_words:1"]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "question": "Does the story explore religious equity?",
+      "constraints": ["yes_no", "limit_words:1"],
+      "follow_ups": {
+        "yes": {
+          "questions": [
+            {
+              "question": "How is religious equity addressed in the story?",
+              "constraints": ["limit_words:100"]
+            },
+            {
+              "question": "What is the religion of the protagonist?",
+              "constraints": ["limit_words:1"]
+            },
+            {
+              "question": "How does the treatment of religion in the story compare to the modern understandings of religious theory?",
+              "constraints": ["limit_words:100"]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "question": "Does the story explore economic equity?",
+      "constraints": ["yes_no", "limit_words:1"],
+      "follow_ups": {
+        "yes": {
+          "questions": [
+            {
+              "question": "What is the economic status of the protagonist?",
+              "constraints": ["limit_words:1", "class"]
+            },
+            {
+              "question": "What is the economic status of the antagonist?",
+              "constraints": ["limit_words:1", "class"]
+            },
+            {
+              "question": "How is economic equity addressed in the story?",
+              "constraints": ["limit_words:100", "class"]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "question": "Does the story have any LGBTQ+ or LGBTQ+ coded characters?",
+      "constraints": ["yes_no", "limit_words:1"],
+      "follow_ups": {
+        "yes": {
+          "questions": [
+            {
+              "question": "How is LGBTQ+ equity addressed in the story?",
+              "constraints": ["limit_words:100"]
+            },
+            {
+              "question": "What is the sexual orientation of the protagonist?",
+              "constraints": ["limit_words:1", "orientation"]
+            },
+            {
+              "question": "What is the sexual orientation of the antagonist?",
+              "constraints": ["limit_words:1", "orientation"]
+            },
+            {
+              "question": "How does the treatment of LGBTQ+ characters in the story compare to the modern understandings of LGBTQ+ theory?",
+              "constraints": ["limit_words:100"]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "question": "Does the story explore ableism in any way?",
+      "constraints": ["yes_no", "limit_words:1"],
+      "follow_ups": {
+        "yes": {
+          "questions": [
+            {
+              "question": "How is ableism addressed in the story?",
+              "constraints": ["limit_words:100"]
+            },
+            {
+              "question": "Do any of the characters have a disability?",
+              "constraints": ["limit_words:1", "yes_no"],
+              "follow_ups": {
+                "yes": {
+                  "questions": [
+                    {
+                      "question": "How are characters with disabilities portrayed in the story?",
+                      "constraints": ["limit_words:100"]
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "question": "Does the story address the intersectionality of race, gender, and class",
+      "constraints": ["yes_no", "limit_words:1"],
+      "follow_ups": {
+        "yes": {
+          "questions": [
+            {
+              "question": "How is intersectionality addressed in the story?",
+              "constraints": ["limit_words:100"]
+            }
+          ]
+        }
+      }
     }
   ]
 }

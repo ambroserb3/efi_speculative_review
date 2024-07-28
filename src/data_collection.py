@@ -3,7 +3,8 @@ import os
 import json
 import logging
 from requests.exceptions import HTTPError
-from src.logging_config import load_config, setup_logging
+from src.logging_config import setup_logging
+from src.utils import load_config, load_prompts, create_assistant, upload_file, apply_constraints, enforce_constraints
 
 # Load the configuration
 config = load_config()
@@ -101,7 +102,7 @@ def process_book(book):
     else:
         logging.warning("No recognizable ID found for this book. Skipping download.")
 
-def main():
+def run_data_collection():
     if not os.path.exists(OUTPUT_DIR_TEXT):
         os.makedirs(OUTPUT_DIR_TEXT)
     if not os.path.exists(OUTPUT_DIR_METADATA):
@@ -131,4 +132,4 @@ def main():
     logging.info(f"Total books found across all subjects: {total_books_found}")
 
 if __name__ == "__main__":
-    main()
+    run_data_collection()

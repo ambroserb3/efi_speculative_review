@@ -3,16 +3,6 @@ import logging
 import os
 import json
 
-def load_config():
-    """Load the configuration from a JSON file."""
-    try:
-        with open('config.json') as config_file:
-            config = json.load(config_file)
-        return config
-    except Exception as e:
-        print(f"Error loading configuration: {e}")
-        return None
-
 def setup_logging(log_file, log_level):
     """Set up logging configuration."""
     if not os.path.exists('logs'):
@@ -31,7 +21,13 @@ def setup_logging(log_file, log_level):
         ]
     )
 
-# Load the configuration and set up logging
-config = load_config()
-if config:
-    setup_logging(config.get('LOG_FILE', 'project_log.log'), config.get('LOG_LEVEL', 'INFO'))
+    # Set specific logging levels for libraries
+    httpx_logger = logging.getLogger("httpx")
+    openai_logger = logging.getLogger("openai")
+
+    httpx_logger.setLevel(logging.WARNING)
+    openai_logger.setLevel(logging.WARNING)
+
+    # Optional: silence any other noisy loggers
+    logging.getLogger("httpx._api").setLevel(logging.WARNING)
+    logging.getLogger("openai").setLevel(logging.WARNING)
