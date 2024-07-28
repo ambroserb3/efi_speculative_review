@@ -1,0 +1,51 @@
+{
+  "prompts": [
+    {
+      "question": "Is racial justice a theme within this story?",
+      "follow_ups": {
+        "yes": {
+          "question": "Explain how racial justice emerges as a theme within the story.",
+          "follow_ups": {}
+        },
+        "no": {}
+      },
+      "constraints": ["limit_words:100"]
+    },
+    {
+      "question": "What is the story synopsis?",
+      "follow_ups": {},
+      "constraints": ["limit_words:150"]
+    },
+    {
+      "question": "Who is the protagonist of the story?",
+      "follow_ups": {},
+      "constraints": []
+    },
+    {
+      "question": "Who is the antagonist?",
+      "follow_ups": {},
+      "constraints": []
+    },
+    {
+      "question": "What are the major themes?",
+      "follow_ups": {},
+      "constraints": []
+    },
+    {
+      "question": "Are there any re-occurring symbols?",
+      "follow_ups": {},
+      "constraints": []
+    },
+    {
+      "question": "Do any elements of the story tie into the x social justice issue?",
+      "follow_ups": {
+        "yes": {
+          "question": "Explain how these elements tie into the x social justice issue.",
+          "follow_ups": {}
+        },
+        "no": {}
+      },
+      "constraints": ["limit_words:100"]
+    }
+  ]
+}
