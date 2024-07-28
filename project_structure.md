@@ -1,4 +1,3 @@
-
 # EFI Speculative Review Project Structure
 
 ## Data
