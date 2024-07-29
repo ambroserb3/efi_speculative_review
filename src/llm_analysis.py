@@ -132,7 +132,7 @@ def analyze_book(book_metadata, file_id, prompts):
                     follow_up_follow_ups = follow_up.get("follow_ups", {})
                     follow_up_constraints = follow_up.get("constraints", [])
                     recursive_prompt(follow_up_question, follow_up_follow_ups, follow_up_constraints)
-                    
+
     for prompt in prompts:
         question = prompt["question"]
         follow_ups = prompt["follow_ups"]
@@ -159,7 +159,7 @@ def run_llm_analysis():
         return
 
     # Extract columns from prompts.json
-    columns = ['title', 'author', 'subjects']  # Start with 'title' column
+    columns = ['title', 'authors', 'subjects']  # Start with 'title' column
     for prompt in prompts:
         columns.append(prompt['question'])
         for follow_up in prompt.get('follow_ups', {}).values():
@@ -196,7 +196,7 @@ def run_llm_analysis():
 
         analysis_result = analyze_book(book_metadata, file_id, prompts)
         analysis_result['title'] = title
-        analysis_result['author'] = book_metadata.get('author', 'Unknown')
+        analysis_result['authors'] = book_metadata.get('authors', 'Unknown')
         analysis_result['subjects'] = book_metadata.get('subjects', 'Unknown')
 
         # Update or add the entry for the book

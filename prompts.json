@@ -153,7 +153,40 @@
       }
     },
     {
+      "question": "What is the primary 'what if' scenario or speculative idea explored in the story?",
+      "constraints": ["limit_words:100"],
+      "follow_ups": {}
+    },
+    {
       "question": "What is the novum of this story?",
+      "constraints": ["limit_words:100"],
+      "follow_ups": {}
+    },
+    {
+      "question": "Does the story use speculative elements to explore social issues?",
+      "constraints": ["yes_no", "limit_words:1"],
+      "follow_ups": {
+        "yes": {
+          "questions": [
+            {
+              "question": "What social issues are explored in the story?",
+              "constraints": ["limit_words:50", "comma_separated_list"]
+            },
+            {
+              "question": "How are social issues explored in the story?",
+              "constraints": ["limit_words:100"]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "question": "How do the speculative elements influence the characters' actions and decisions?",
+      "constraints": ["limit_words:100"],
+      "follow_ups": {}
+    },
+    {
+      "question": "How do the speculative elements influence the plot?",
       "constraints": ["limit_words:100"],
       "follow_ups": {}
     },
@@ -228,6 +261,28 @@
       }
     },
     {
+      "question": "Is this work classified as horror?",
+      "constraints": ["yes_no", "limit_words:1"],
+      "follow_ups": {
+        "yes": {
+          "questions": [
+            {
+              "question": "What is the source of horror in the story?",
+              "constraints": ["limit_words:100"]
+            },
+            {
+              "question": "What is the tone of the horror?",
+              "constraints": ["limit_words:10"]
+            },
+            {
+              "question": "Using a list of keywords, what sub-genres of horror does this story fall under?",
+              "constraints": ["limit_words:30", "comma_separated_list"]
+            }
+          ]
+        }
+      }
+    },
+    {
       "question": "Is racial justice a theme within this story?",
       "constraints": ["yes_no", "limit_words:1"],
       "follow_ups": {
@@ -294,10 +349,20 @@
                   ]
                 }
               }
-            },
+            }
+          ]
+        }
+      }
+    },
+    {
+      "question": "Does the story pass the Bechdel test?",
+      "constraints": ["yes_no", "limit_words:1"],
+      "follow_ups": {
+        "yes": {
+          "questions": [
             {
-              "question": "Does the story pass the Bechdel test?",
-              "constraints": ["yes_no", "limit_words:1"]
+              "question": "How does the story pass the Bechdel test? Can you provide a specific scene as an example?",
+              "constraints": ["limit_words:100"]
             }
           ]
         }

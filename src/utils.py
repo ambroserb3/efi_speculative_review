@@ -94,24 +94,38 @@ def apply_constraints(prompt, constraints, metadata=None):
 
 def enforce_constraints(response, constraints):
     """Enforce constraints on the response."""
-    # Keep commas while stripping other punctuation
     response_cleaned = response.strip().lower().translate(str.maketrans('', '', string.punctuation.replace(',', '')))
     for constraint in constraints:
         if "limit_words" in constraint:
             limit = int(constraint.split(":")[1])
-            if len(response_cleaned.split()) > limit:
+            if len(response.split()) > limit:
                 logging.warning(f"Response exceeds word limit of {limit} words.")
                 return False
         elif constraint == "yes_no":
-            if response_cleaned not in ["yes", "no"]:
+            if response not in ["yes", "no"]:
                 logging.warning("Response is not a 'yes' or 'no' answer.")
                 return False
+        elif constraint == "gender":
+            if response not in ["male", "female", "trans", "other"]:
+                logging.warning("Response is not a valid gender answer.")
+                return False
+        elif constraint == "pov":
+            if response not in ["first-person", "third-person", "other"]:
+                logging.warning("Response is not a valid POV answer.")
+                return False
+        elif constraint == "orientation":
+            if response not in ["straight", "gay", "bisexual", "asexual", "unknown"]:
+                logging.warning("Response is not a valid orientation answer.")
+                return False
+        elif constraint == "class":
+            if response not in ["upper-class", "lower-class", "middle-class", "unknown"]:
+                logging.warning("Response is not a valid class answer.")
+                return False
         elif constraint == "comma_separated_list":
-            if not isinstance(response, str) or ',' not in response:
+            if not isinstance(response, str) or "," not in response:
                 logging.warning("Response is not a comma-separated list.")
                 return False
     return True
 
 def clean_text(text):
-    # Implement text cleaning steps here if necessary
     return text.strip()
