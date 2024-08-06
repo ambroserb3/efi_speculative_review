@@ -8,32 +8,32 @@
     {
       "question": "Who is the protagonist of the story?",
       "constraints": ["limit_words:50"],
-      "follow_ups": {
-        "yes": {
-          "questions": [
-            {
-              "question": "What are the protagonist's goals?",
-              "constraints": ["limit_words:50", "comma_separated_list"]
-            },
-            {
-              "question": "What are the protagonist's motivations?",
-              "constraints": ["limit_words:50", "comma_separated_list"]
-            },
-            {
-              "question": "What are the protagonist's strengths?",
-              "constraints": ["limit_words:50", "comma_separated_list"]
-            },
-            {
-              "question": "What are the protagonist's weaknesses?",
-              "constraints": ["limit_words:50", "comma_separated_list"]
-            },
-            {
-              "question": "How does the protagonist evolve throughout the story?",
-              "constraints": ["limit_words:50"]
-            }
-          ]
-        }
-      }
+      "follow_ups": {}
+    },
+    {
+      "question": "What are the protagonist's goals?",
+      "constraints": ["limit_words:50"],
+      "follow_ups": {}
+    },
+    {
+      "question": "What are the protagonist's motivations?",
+      "constraints": ["limit_words:50"],
+      "follow_ups": {}
+    },
+    {
+      "question": "What are the protagonist's strengths?",
+      "constraints": ["limit_words:50"],
+      "follow_ups": {}
+    },
+    {
+      "question": "What are the protagonist's weaknesses?",
+      "constraints": ["limit_words:50"],
+      "follow_ups": {}
+    },
+    {
+      "question": "How does the protagonist evolve throughout the story?",
+      "constraints": ["limit_words:50"],
+      "follow_ups": {}
     },
     {
       "question": "Who is the antagonist?",
@@ -62,32 +62,32 @@
     },
     {
       "question": "What is the tone of the story?",
-      "constraints": ["limit_words:10"],
+      "constraints": ["limit_words:15"],
       "follow_ups": {}
     },
     {
       "question": "What is the mood of the story?",
-      "constraints": ["limit_words:10"],
+      "constraints": ["limit_words:15"],
       "follow_ups": {}
     },
     {
       "question": "Using a list, what symbols are used in the story, if any?",
-      "constraints": ["comma_separated_list", "limit_words:25"],
+      "constraints": ["comma_separated_list", "limit_words:75"],
       "follow_ups": {}
     },
     {
       "question": "Using a list, what motifs are used in the story, if any?",
-      "constraints": ["comma_separated_list", "limit_words:25"],
+      "constraints": ["comma_separated_list", "limit_words:75"],
       "follow_ups": {}
     },
     {
       "question": "When does the story take place?",
-      "constraints": ["limit_words:5"],
+      "constraints": ["limit_words:15"],
       "follow_ups": {}
     },
     {
-      "question": "How does the historical context of the time period influence the story?",
-      "constraints": ["limit_words:50"],
+      "question": "Does the historical context of the time period influence the story?",
+      "constraints": ["limit_words:1", "yes_no"],
       "follow_ups": {
         "yes": {
           "questions": [
@@ -406,7 +406,7 @@
             },
             {
               "question": "How is economic equity addressed in the story?",
-              "constraints": ["limit_words:100", "class"]
+              "constraints": ["limit_words:100"]
             }
           ]
         }

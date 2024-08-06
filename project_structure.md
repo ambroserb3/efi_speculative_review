@@ -4,11 +4,9 @@
 
 This directory contains all data related to the project.
 
-- `raw/`
-  - `speculative_fiction_books.json` - Raw data from Project Gutenberg API
 - `processed/`
-  - `speculative_fiction_analyses.csv` - Analyzed data
-  - `speculative_fiction_books.csv` - Extracted book information
+  - run/`analysis_results.csv` - LLM responses
+  - `books_metadata.csv` - Extracted book information
 - `full_text/`
   - [Full text files of books]
 - metadata/
@@ -26,7 +24,9 @@ This directory contains all source code files.
 
 - `__init__.py`
 - `data_collection.py` - Script for collecting data from Project Gutenberg API
-- `data_analysis.py` - Script for analyzing text using OpenAI's API
+- `llm_analysis.py` - Script for analyzing text using OpenAI's API
+- compare_runs.py - Script for comparing results across runs
+- results_analysis.py - Script for visualizing results from a single run
 - `create_metadata.py` - Script for creating metadata from the collected data
 - `logging_config.py` - Logging configuration for the project
 - `utils.py` - Utility functions
@@ -36,7 +36,6 @@ This directory contains all source code files.
 This directory contains reports, figures, and drafts related to the dissertation.
 
 - `figures/` - Folder to store plots and figures
-- `dissertation_notes.md` - Notes for the dissertation
 
 ## Tests
 

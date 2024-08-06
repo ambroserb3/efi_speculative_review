@@ -20,6 +20,9 @@ if config:
     setup_logging(config.get('LOG_FILE', 'project_log.log'), config.get('LOG_LEVEL', 'INFO'))
 
 MODEL = config.get('OPENAI_MODEL')
+TEMPERATURE = config.get('temperature', 1)
+TOP_P = config.get('top_p', 1)
+
 if not MODEL:
     raise KeyError("OPENAI_MODEL is not defined in the configuration file.")
 
@@ -37,9 +40,11 @@ def create_assistant(client):
     try:
         assistant = client.beta.assistants.create(
             name="Literature Analysis Assistant",
-            instructions="You are a helpful assistant specializing in analyzing literary texts. Please only provide responses that conform to specified formatting and constraints.",
+            instructions="You are a scholar specializing in analyzing literary texts. Please only provide responses which conform to specified formatting and constraints.",
             tools=[{"type": "code_interpreter"}],
             model=MODEL,
+            temperature=TEMPERATURE,
+            top_p=TOP_P
         )
         logging.debug(f"Assistant creation response: {assistant}")
         return assistant.id
@@ -81,44 +86,44 @@ def apply_constraints(prompt, constraints, metadata=None):
         elif constraint == "yes_no":
             prompt = f"{prompt} (You must answer with either 'yes' or 'no' only. Any other response will be considered invalid.)"
         elif constraint == "gender":
-            prompt = f"{prompt} (You must answer with one of the following: 'male', 'female', 'trans', or 'other' only. Any other response will be considered invalid.)"
+            prompt = f"{prompt} (You must answer with either: 'male' or 'female' only. Any other response will be considered invalid.)"
         elif constraint == "pov":
-            prompt = f"{prompt} (You must answer with one of the following: 'first-person', 'third-person' or 'other' only. Any other response will be considered invalid.)"
+            prompt = f"{prompt} (You must answer with one of the following: 'first-person', 'third-person', or 'other' only. Any other response will be considered invalid.)"
         elif constraint == "orientation":
             prompt = f"{prompt} (You must answer with one of the following: 'straight', 'gay', 'bisexual', 'asexual', or 'unknown' only. Any other response will be considered invalid.)"
         elif constraint == "class":
-            prompt = f"{prompt} (You must answer with one of the following: 'upper-class', 'lower-class', 'middle-class', or 'unknown' only. Any other response will be considered invalid.)"
+            prompt = f"{prompt} (You must answer with one of the following: 'upperclass', 'lowerclass', 'middleclass', or 'unknown' only. Any other response will be considered invalid.)"
         elif constraint == "comma_separated_list":
             prompt = f"{prompt} (You must provide the answer as a comma-separated list.)"
     return prompt
 
 def enforce_constraints(response, constraints):
     """Enforce constraints on the response."""
-    response_cleaned = response.strip().lower().translate(str.maketrans('', '', string.punctuation.replace(',', '')))
+    normalized_response = response.strip().lower().translate(str.maketrans('', '', string.punctuation))
     for constraint in constraints:
         if "limit_words" in constraint:
             limit = int(constraint.split(":")[1])
-            if len(response.split()) > limit:
-                logging.warning(f"Response exceeds word limit of {limit} words.")
+            if len(normalized_response.split()) > limit:
+                logging.info(f"Response exceeds word limit of {limit} words.")
                 return False
         elif constraint == "yes_no":
-            if response not in ["yes", "no"]:
+            if normalized_response not in ["yes", "no"]:
                 logging.warning("Response is not a 'yes' or 'no' answer.")
                 return False
         elif constraint == "gender":
-            if response not in ["male", "female", "trans", "other"]:
+            if normalized_response not in ["male", "female"]:
                 logging.warning("Response is not a valid gender answer.")
                 return False
         elif constraint == "pov":
-            if response not in ["first-person", "third-person", "other"]:
-                logging.warning("Response is not a valid POV answer.")
+            if normalized_response not in ["first-person", "third-person", "other"]:
+                logging.warning("Response is not a valid point of view answer.")
                 return False
         elif constraint == "orientation":
-            if response not in ["straight", "gay", "bisexual", "asexual", "unknown"]:
+            if normalized_response not in ["straight", "gay", "bisexual", "asexual", "unknown"]:
                 logging.warning("Response is not a valid orientation answer.")
                 return False
         elif constraint == "class":
-            if response not in ["upper-class", "lower-class", "middle-class", "unknown"]:
+            if normalized_response not in ["upperclass", "lowerclass", "middleclass", "unknown"]:
                 logging.warning("Response is not a valid class answer.")
                 return False
         elif constraint == "comma_separated_list":
@@ -127,5 +132,7 @@ def enforce_constraints(response, constraints):
                 return False
     return True
 
-def clean_text(text):
-    return text.strip()
+def check_token_usage(current_usage, max_usage):
+    if current_usage >= max_usage:
+        return True
+    return False
