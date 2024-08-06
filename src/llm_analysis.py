@@ -4,7 +4,15 @@ import pandas as pd
 import logging
 from openai import OpenAI
 from src.logging_config import setup_logging
-from src.utils import load_config, load_prompts, create_assistant, upload_file, apply_constraints, enforce_constraints, check_token_usage
+from src.utils import (
+    load_config,
+    load_prompts,
+    create_assistant,
+    upload_file,
+    apply_constraints,
+    enforce_constraints,
+    check_token_usage,
+)
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
 
@@ -12,13 +20,12 @@ config = load_config()
 if not config:
     raise Exception("Configuration could not be loaded. Exiting.")
 
-API_KEY = config.get('OPENAI_API_KEY')
-PROCESSED_DATA_DIR = config.get('PROCESSED_DATA_DIR')
-OUTPUT_DIR_TEXT = config.get('OUTPUT_DIR_TEXT')
+API_KEY = config.get("OPENAI_API_KEY")
+PROCESSED_DATA_DIR = config.get("PROCESSED_DATA_DIR")
+OUTPUT_DIR_TEXT = config.get("OUTPUT_DIR_TEXT")
 PROMPTS_FILE = "prompts.json"
 
 client = OpenAI(api_key=API_KEY)
-# Create assistant once
 assistant_id = create_assistant(client)
 
 if not PROCESSED_DATA_DIR:
@@ -28,8 +35,13 @@ if not API_KEY:
 if not OUTPUT_DIR_TEXT:
     raise KeyError("OUTPUT_DIR_TEXT is not defined in the configuration file.")
 
+
 def create_thread(file_id, initial_message):
-    """Create a new chat session in OpenAI and return the chat ID."""
+    """Create a new chat session in OpenAI and return the chat ID.
+    :param file_id: The ID of the uploaded text file.
+    :param initial_message: The initial message to send to the API.
+    :return: The ID of the chat session
+    """
     try:
         response = client.beta.threads.create(
             messages=[
@@ -37,11 +49,8 @@ def create_thread(file_id, initial_message):
                     "role": "user",
                     "content": initial_message,
                     "attachments": [
-                        {
-                            "file_id": file_id,
-                            "tools": [{"type": "code_interpreter"}]
-                        }
-                    ]
+                        {"file_id": file_id, "tools": [{"type": "code_interpreter"}]}
+                    ],
                 }
             ]
         )
@@ -52,14 +61,16 @@ def create_thread(file_id, initial_message):
         logging.error(f"Error creating thread: {e}")
         return None
 
+
 def call_openai_api(thread_id, message):
-    """Call OpenAI API within a given chat session."""
+    """Call OpenAI API within a given chat session.
+    :param thread_id: The ID of the chat session.
+    :param message: The message to send to the API.
+    :return: The response from the API.
+    """
     try:
         client.beta.threads.messages.create(
-            thread_id=thread_id,
-            role="user",
-            content=message,
-            timeout=60
+            thread_id=thread_id, role="user", content=message, timeout=60
         )
     except Exception as e:
         logging.error(f"Error creating message: {e}")
@@ -72,10 +83,10 @@ def call_openai_api(thread_id, message):
             timeout=60,
         )
 
-        if run.status == 'completed':
+        if run.status == "completed":
             logging.debug("Run completed successfully.")
 
-        while run.status != 'completed' and attempt < 3:
+        while run.status != "completed" and attempt < 3:
             logging.error(f"Unexpected run status: {run.status} for message: {message}")
             logging.error(run.usage)
             logging.error(run.last_error.code)
@@ -85,18 +96,20 @@ def call_openai_api(thread_id, message):
             logging.info(f"Retrying in 10 seconds...")
             time.sleep(10)
             run = client.beta.thread.runs.create_and_poll(
-                thread_id=thread_id,
-                assistant_id=assistant_id,
-                timeout=60
+                thread_id=thread_id, assistant_id=assistant_id, timeout=60
             )
             attempt += 1
 
-        if run.status == 'completed':
+        if run.status == "completed":
             messages = client.beta.threads.messages.list(thread_id=thread_id)
             for msg in messages:
-                if msg.role == 'assistant':
+                if msg.role == "assistant":
                     content_blocks = msg.content
-                    response_text = "".join(block.text.value for block in content_blocks if block.type == "text")
+                    response_text = "".join(
+                        block.text.value
+                        for block in content_blocks
+                        if block.type == "text"
+                    )
                     logging.info(f"API call response: {response_text}")
                     logging.info(run.usage)
                     return response_text, run.usage.total_tokens
@@ -111,14 +124,25 @@ def call_openai_api(thread_id, message):
         logging.error(f"Error calling OpenAI API: {e}")
         return None
 
+
 def analyze_book(book_metadata, file_id, prompts, max_workers):
-    """Analyze a single book using the loaded prompts."""
+    """Analyze a single book using the loaded prompts.
+    :param book_metadata: The metadata for the book.
+    :param file_id: The ID of the uploaded text file.
+    :param prompts: The list of prompts to use for analysis.
+    :param max_workers: The maximum number of workers to use for analysis.
+    :return: The analysis results for the book.
+    """
     results = {}
-    initial_message = f"Here is the full text of the book: {book_metadata.get('title', 'Unknown')}."
+    initial_message = (
+        f"Here is the full text of the book: {book_metadata.get('title', 'Unknown')}."
+    )
     thread_id = create_thread(file_id, initial_message)
 
     if not thread_id:
-        logging.error(f"Failed to create thread for book: {book_metadata.get('title', 'Unknown')}. Skipping.")
+        logging.error(
+            f"Failed to create thread for book: {book_metadata.get('title', 'Unknown')}. Skipping."
+        )
         return results
 
     max_tokens_per_minute = 20000 / max_workers
@@ -138,7 +162,6 @@ def analyze_book(book_metadata, file_id, prompts, max_workers):
             logging.error(f"Failed to get response for prompt: {prompt}")
             return total_tokens_used
 
-        # Retry mechanism
         attempt = 0
         while not enforce_constraints(response, constraints) and attempt < 3:
             if attempt == 3:
@@ -156,12 +179,9 @@ def analyze_book(book_metadata, file_id, prompts, max_workers):
         logging.info(f"Question: {question}")
         logging.info(f"Response: {response}")
 
-        # Add the response as a message from assistant
         try:
             client.beta.threads.messages.create(
-                thread_id=thread_id,
-                role="assistant",
-                content=response
+                thread_id=thread_id, role="assistant", content=response
             )
             logging.debug("Added assistant message: {}".format(response))
         except Exception as e:
@@ -174,12 +194,22 @@ def analyze_book(book_metadata, file_id, prompts, max_workers):
                         follow_up_question = follow_up_item["question"]
                         follow_up_follow_ups = follow_up_item.get("follow_ups", {})
                         follow_up_constraints = follow_up_item.get("constraints", [])
-                        total_tokens_used = recursive_prompt(follow_up_question, follow_up_follow_ups, follow_up_constraints, total_tokens_used)
+                        total_tokens_used = recursive_prompt(
+                            follow_up_question,
+                            follow_up_follow_ups,
+                            follow_up_constraints,
+                            total_tokens_used,
+                        )
                 else:
                     follow_up_question = follow_up["question"]
                     follow_up_follow_ups = follow_up.get("follow_ups", {})
                     follow_up_constraints = follow_up.get("constraints", [])
-                    total_tokens_used = recursive_prompt(follow_up_question, follow_up_follow_ups, follow_up_constraints, total_tokens_used)
+                    total_tokens_used = recursive_prompt(
+                        follow_up_question,
+                        follow_up_follow_ups,
+                        follow_up_constraints,
+                        total_tokens_used,
+                    )
 
         return total_tokens_used
 
@@ -187,7 +217,9 @@ def analyze_book(book_metadata, file_id, prompts, max_workers):
         question = prompt["question"]
         follow_ups = prompt["follow_ups"]
         constraints = prompt.get("constraints", [])
-        total_tokens_used = recursive_prompt(question, follow_ups, constraints, total_tokens_used)
+        total_tokens_used = recursive_prompt(
+            question, follow_ups, constraints, total_tokens_used
+        )
         logging.info(f"Total tokens used after request: {total_tokens_used}")
 
     logging.info(f"Total tokens used: {total_tokens_used}")
@@ -195,60 +227,77 @@ def analyze_book(book_metadata, file_id, prompts, max_workers):
 
 
 def initialize_analysis_results(prompts, output_path):
-    """Initialize the analysis results file with all possible columns."""
-    columns = ['title', 'authors', 'subjects']
+    """Initialize the analysis results file with all possible columns.
+    :param prompts: The list of prompts to use for analysis.
+    :param output_path: The path to the output file.
+    """
+    columns = ["title", "authors", "subjects"]
 
     def add_questions(prompt_list):
         for prompt in prompt_list:
-            columns.append(prompt['question'])
-            for follow_up in prompt.get('follow_ups', {}).values():
-                follow_up_questions = follow_up.get('questions', [])
+            columns.append(prompt["question"])
+            for follow_up in prompt.get("follow_ups", {}).values():
+                follow_up_questions = follow_up.get("questions", [])
                 if follow_up_questions:
                     add_questions(follow_up_questions)
 
     # Add prompt questions and follow-ups
     add_questions(prompts)
 
-    # Initialize DataFrame with these columns
     df = pd.DataFrame(columns=columns)
-    df.to_csv(output_path, index=False, encoding='utf-8')
+    df.to_csv(output_path, index=False, encoding="utf-8")
     logging.info(f"Initialized analysis_results.csv with columns: {columns}")
 
+
 def process_book(row, prompts, results_path, results_df_columns, max_workers):
+    """Process a single book using the loaded prompts.
+    :param row: The book metadata.
+    :param prompts: The list of prompts to use for analysis.
+    :param results_path: The path to the results file.
+    :param results_df_columns: The columns of the results DataFrame.
+    :param max_workers: The maximum number of workers to use for analysis.
+    :return: The analysis results for the book.
+    """
     book_metadata = row.to_dict()
-    title = book_metadata.get('title')
-    authors = book_metadata.get('authors', 'Unknown')
-    subjects = book_metadata.get('subjects', 'Unknown')
+    title = book_metadata.get("title")
+    authors = book_metadata.get("authors", "Unknown")
+    subjects = book_metadata.get("subjects", "Unknown")
 
     logging.info(f"Analyzing book: {title}")
 
-    # Get the full text file path
-    text_filename = book_metadata.get('text_filename')
+    text_filename = book_metadata.get("text_filename")
     text_path = os.path.join(OUTPUT_DIR_TEXT, text_filename)
 
     if not os.path.exists(text_path):
         logging.error(f"Text file not found for book: {title}. Skipping.")
         return None
 
-    # Upload the file to OpenAI
     file_id = upload_file(text_path, client)
     if not file_id:
         logging.error(f"Failed to upload file for book: {title}. Skipping.")
         return None
 
     analysis_result = analyze_book(book_metadata, file_id, prompts, max_workers)
-    analysis_result['title'] = title
-    analysis_result['authors'] = authors
-    analysis_result['subjects'] = subjects
+    analysis_result["title"] = title
+    analysis_result["authors"] = authors
+    analysis_result["subjects"] = subjects
 
-    # Fill missing values with NaN
-    analysis_result_filled = {col: analysis_result.get(col, pd.NA) for col in results_df_columns}
+    analysis_result_filled = {
+        col: analysis_result.get(col, pd.NA) for col in results_df_columns
+    }
     logging.info(f"Analysis completed for book: {title}")
     return analysis_result_filled
 
-def run_llm_analysis(max_books, max_workers, output_path="data/processed/analysis_results.csv"):
-    """Run the LLM analysis on each book in the books dataset and save the results."""
-    dataset_path = os.path.join(PROCESSED_DATA_DIR, 'books_metadata.csv')
+
+def run_llm_analysis(
+    max_books, max_workers, output_path="data/processed/analysis_results.csv"
+):
+    """Run the LLM analysis on each book in the books dataset and save the results.
+    :param max_books: The maximum number of books to analyze.
+    :param max_workers: The maximum number of workers to use for analysis.
+    :param output_path: The path to save the analysis results.
+    """
+    dataset_path = os.path.join(PROCESSED_DATA_DIR, "books_metadata.csv")
     results_path = output_path
 
     if not os.path.exists(dataset_path):
@@ -258,14 +307,12 @@ def run_llm_analysis(max_books, max_workers, output_path="data/processed/analysi
     df = pd.read_csv(dataset_path)
     prompts = load_prompts(PROMPTS_FILE)
 
-
     initialize_analysis_results(prompts, results_path)
 
     if not prompts:
         logging.error("No prompts loaded. Exiting.")
         return
 
-    # Initialize results DataFrame if not exists
     if os.path.exists(results_path):
         results_df = pd.read_csv(results_path)
     else:
@@ -276,7 +323,14 @@ def run_llm_analysis(max_books, max_workers, output_path="data/processed/analysi
         for idx, row in enumerate(df.iterrows()):
             if idx >= max_books:
                 break
-            future = executor.submit(process_book, row[1], prompts, results_path, results_df.columns, max_workers)
+            future = executor.submit(
+                process_book,
+                row[1],
+                prompts,
+                results_path,
+                results_df.columns,
+                max_workers,
+            )
             future_to_book[future] = row[1]
 
         for future in as_completed(future_to_book):
@@ -284,13 +338,13 @@ def run_llm_analysis(max_books, max_workers, output_path="data/processed/analysi
             try:
                 result = future.result()
                 if result:
-                    # Update or add the entry for the book
-                    title = result['title']
-                    results_df = results_df[results_df['title'] != title]  # Remove any existing entry for the book
-                    results_df = pd.concat([results_df, pd.DataFrame([result])], ignore_index=True)
+                    title = result["title"]
+                    results_df = results_df[results_df["title"] != title]
+                    results_df = pd.concat(
+                        [results_df, pd.DataFrame([result])], ignore_index=True
+                    )
 
-                    # Save results incrementally without duplicates
-                    results_df.to_csv(results_path, index=False, encoding='utf-8')
+                    results_df.to_csv(results_path, index=False, encoding="utf-8")
                     logging.info(f"Analysis results saved to {results_path}")
             except Exception as exc:
                 logging.error(f"Book analysis generated an exception: {exc}")
